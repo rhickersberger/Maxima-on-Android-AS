@@ -32,15 +32,14 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 public final class UnzipAsyncTask extends AsyncTask<Integer, Integer, Integer> {
-	private final static int CHUNK_SIZE = 32 * 1024;
-	byte[] _fileIOBuffer = new byte[CHUNK_SIZE];
 	InputStream inst;
 	String directory;
-	private Activity activity;
+	private final Activity activity;
 	private ProgressDialog dialog;
 	private String msg1, msg2;
 
 	public UnzipAsyncTask(Activity anActivity) {
+		super();
 		this.activity = anActivity;
 	}
 
@@ -94,7 +93,7 @@ public final class UnzipAsyncTask extends AsyncTask<Integer, Integer, Integer> {
 			return (-1);
 		}
 		ZipInputStream zin = new ZipInputStream(inst);
-		ZipEntry ze = null;
+		ZipEntry ze;
 		int c = 0;
 		BufferedOutputStream fos = null;
 		File file = null;
@@ -111,11 +110,13 @@ public final class UnzipAsyncTask extends AsyncTask<Integer, Integer, Integer> {
 				} else {
 					// case of file
 					if (file.exists()) {
-						file.delete();
+						if (!file.delete()) {
+							Log.e("MoA", "failed to delete file 1");
+						}
 					}
 					fos = new BufferedOutputStream(new FileOutputStream(file),
 							64 * 1024);
-					int numread = 0;
+					int numread;
 					while ((numread = zin.read(buf)) != -1) {
 						fos.write(buf, 0, numread);
 						publishProgress(c++);
@@ -127,13 +128,17 @@ public final class UnzipAsyncTask extends AsyncTask<Integer, Integer, Integer> {
 			Log.d("MoA", "exception12");
 			e.printStackTrace();
 			try {
-				fos.close();
+				if (fos != null)  fos.close();
 			} catch (IOException e1) {
 				Log.d("MoA", "exception13");
 				e1.printStackTrace();
 				return (-1);
 			}
-			file.delete();
+			if (file != null) {
+				if (!file.delete()) {
+					Log.e("MoA", "failed to delete file 2");
+				}
+			}
 			return (-1);
 		}
 		return stage;

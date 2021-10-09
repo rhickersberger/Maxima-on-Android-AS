@@ -1,6 +1,5 @@
 package jp.yhonda;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -8,7 +7,6 @@ import android.preference.*;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.*;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import java.util.*;
 
 /*

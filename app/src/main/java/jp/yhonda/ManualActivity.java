@@ -21,11 +21,11 @@ package jp.yhonda;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
@@ -48,9 +48,9 @@ import android.widget.Toast;
 
 public class ManualActivity extends AppCompatActivity implements OnTouchListener {
 	WebView webview = null;
-	String curURL = "";
 	Activity thisActivity;
 
+	@SuppressLint("SetJavaScriptEnabled")
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Log.v("MoAMan", "onCreate");
@@ -59,9 +59,7 @@ public class ManualActivity extends AppCompatActivity implements OnTouchListener
 		webview = (WebView) findViewById(R.id.webViewInHTMLActivity);
 		webview.getSettings().setJavaScriptEnabled(true);
 		webview.getSettings().setBuiltInZoomControls(true);
-		if (Build.VERSION.SDK_INT > 11) {
-			webview.getSettings().setDisplayZoomControls(false);
-		}
+		webview.getSettings().setDisplayZoomControls(false);
 		webview.getSettings().setUseWideViewPort(true);
 		webview.getSettings().setLoadWithOverviewMode(true);
 
@@ -71,16 +69,13 @@ public class ManualActivity extends AppCompatActivity implements OnTouchListener
 				SharedPreferences settings = PreferenceManager
 						.getDefaultSharedPreferences(thisActivity);
 				float sc = settings.getFloat("man scale", 1.0f);
-				Log.v("MoAMan", "sc=" + Float.toString(sc));
+				Log.v("MoAMan", "sc=" + sc);
 				view.setInitialScale((int) (100 * sc));
-				webview.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						webview.loadUrl("javascript:var bd=document.getElementsByTagName('body')[0];"
-								+ "bd.style.marginLeft='5px';bd.style.width=(window.innerWidth*0.92)+'px';"
-								+ "console.log('innerWidth='+window.innerWidth);");
-						Log.v("MoAMan", "onScaleChanged called.");
-					}
+				webview.postDelayed(() -> {
+					webview.loadUrl("javascript:var bd=document.getElementsByTagName('body')[0];"
+							+ "bd.style.marginLeft='5px';bd.style.width=(window.innerWidth*0.92)+'px';"
+							+ "console.log('innerWidth='+window.innerWidth);");
+					Log.v("MoAMan", "onScaleChanged called.");
 				}, 100);
 
 				addJSforCopyExample();
@@ -89,12 +84,9 @@ public class ManualActivity extends AppCompatActivity implements OnTouchListener
 			@Override
 			public void onScaleChanged(final WebView webView, float oldScale,
 					float newScale) {
-				webview.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						webView.loadUrl("javascript:document.getElementsByTagName('body')[0].style.width=(window.innerWidth*0.95)+'px';console.log('innerWidth='+window.innerWidth);");
-						Log.v("MoAMan", "onScaleChanged called.");
-					}
+				webview.postDelayed(() -> {
+					webView.loadUrl("javascript:document.getElementsByTagName('body')[0].style.width=(window.innerWidth*0.95)+'px';console.log('innerWidth='+window.innerWidth);");
+					Log.v("MoAMan", "onScaleChanged called.");
 				}, 100);
 			}
 		});
@@ -102,7 +94,7 @@ public class ManualActivity extends AppCompatActivity implements OnTouchListener
 				.getDefaultSharedPreferences(this);
 		float sc = settings.getFloat("man scale", 1.0f);
 		webview.setInitialScale((int) (100 * sc));
-		Log.v("MoAMan", "onCreate sc=" + Float.toString(sc));
+		Log.v("MoAMan", "onCreate sc=" + sc);
 
 		webview.setOnTouchListener(this);
 
@@ -132,9 +124,7 @@ public class ManualActivity extends AppCompatActivity implements OnTouchListener
 
 		webview.setContentDescription(urlinIntent);
 
-		Bundle bundle = null;
-		// SharedPreferences settings =
-		// PreferenceManager.getDefaultSharedPreferences(this);
+		Bundle bundle;
 		String serialized = settings.getString("parcel", null);
 
 		if ((!manLangChanged) && (serialized != null)) {
@@ -185,19 +175,14 @@ public class ManualActivity extends AppCompatActivity implements OnTouchListener
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		boolean retval = false;
-		switch (item.getItemId()) {
-		case R.id.gomaxima:
+		if (item.getItemId() == R.id.gomaxima) {
 			Intent intent = new Intent(this, MaximaOnAndroidActivity.class);
 			setResult(RESULT_OK, intent);
 			intent.putExtra("sender", "ManualActivity");
 			finish();
-			retval = true;
-			break;
-		default:
-			retval = false;
+			return true;
 		}
-		return retval;
+		return false;
 	}
 
 	private void addJSforCopyExample() {
@@ -303,7 +288,7 @@ public class ManualActivity extends AppCompatActivity implements OnTouchListener
 			Log.v("MoA Man", "onTouch on webview");
 			@SuppressWarnings("deprecation")
 			float sc = webview.getScale();
-			Log.v("MoAMan", "sc=" + Float.toString(sc));
+			Log.v("MoAMan", "sc=" + sc);
 			SharedPreferences settings = PreferenceManager
 					.getDefaultSharedPreferences(this);
 			Editor editor = settings.edit();

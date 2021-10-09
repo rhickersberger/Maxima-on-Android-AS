@@ -1,13 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 31
 
     defaultConfig {
         applicationId "jp.yhonda"
         minSdkVersion 19
-        targetSdkVersion 27
+        /* this is the newest target sdk version that allows executing binaries in the
+         * application's data directory. See https://stackoverflow.com/a/60370584 */
+        targetSdkVersion 28
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 

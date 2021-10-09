@@ -23,9 +23,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.Context;
 
 public final class MaximaVersion {
-	private int major = 5;
-	private int minor = 27;
-	private int patch = 0;
+	private int major, minor, patch;
 
 	MaximaVersion() {
 		major = 5;
@@ -37,12 +35,6 @@ public final class MaximaVersion {
 		this.major = major;
 		this.minor = minor;
 		this.patch = patch;
-	}
-
-	MaximaVersion(int vers[]) {
-		this.major = vers[0];
-		this.minor = vers[1];
-		this.patch = vers[2];
 	}
 
 	public void loadVersFromSharedPrefs(Context context) {
@@ -63,14 +55,11 @@ public final class MaximaVersion {
 	}
 
 	public long versionInteger() {
-		long res = ((long) major) * (1000 * 1000) + ((long) minor) * 1000
-				+ ((long) patch);
-		return res;
+		return ((long) major) * (1000 * 1000) + ((long) minor) * 1000 + ((long) patch);
 	}
 
 	public String versionString() {
-		return String.valueOf(major) + "." + String.valueOf(minor) + "."
-				+ String.valueOf(patch);
+		return major + "." + minor + "." + patch;
 	}
 
 }

@@ -23,20 +23,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.StatFs;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 public final class MOAInstallerActivity extends AppCompatActivity {
@@ -82,7 +75,7 @@ public final class MOAInstallerActivity extends AppCompatActivity {
 		// Where to Install
 		// maxima, init.lisp : internalDir
 		// maxima-5.X.0 : installedDir
-		Intent data = null;
+		Intent data;
 		Intent origIntent = this.getIntent();
 		String vers = origIntent.getStringExtra("version");
 		try {
@@ -116,7 +109,9 @@ public final class MOAInstallerActivity extends AppCompatActivity {
 				if (CpuArchitecture.getCpuArchitecture().equals(CpuArchitecture.X86)) {
 					File x86File=new File(internalDir.getAbsolutePath()+"/x86");
 					if (!x86File.exists()) {
-						x86File.createNewFile();
+						if (!x86File.createNewFile()) {
+							Log.e("MoA", "file already exists");
+						}
 					}
 				}
 				String maximaFile=CpuArchitecture.getMaximaFile();
@@ -202,23 +197,22 @@ public final class MOAInstallerActivity extends AppCompatActivity {
 		MaximaVersion prevVers = new MaximaVersion();
 		prevVers.loadVersFromSharedPrefs(this);
 		String maximaDirName = "/maxima-" + prevVers.versionString();
-		String maximaDirPath = null;
+		String maximaDirPath;
 		if ((new File(internalDir.getAbsolutePath() + maximaDirName)).exists()) {
 			maximaDirPath = internalDir.getAbsolutePath() + maximaDirName;
 		} else {
 			maximaDirPath = null;
 		}
-		String filelist[] = { internalDir.getAbsolutePath() + "/init.lisp",
+		String[] filelist = { internalDir.getAbsolutePath() + "/init.lisp",
 				internalDir.getAbsolutePath() + "/x86",
 				internalDir.getAbsolutePath() + "/maxima",
 				internalDir.getAbsolutePath() + "/maxima.x86",
 				internalDir.getAbsolutePath() + "/maxima.pie",
 				internalDir.getAbsolutePath() + "/maxima.x86.pie",
 				internalDir.getAbsolutePath() + "/additions", maximaDirPath };
-		for (int i = 0; i < filelist.length; i++) {
-			if ((filelist[i] != null) && (new File(filelist[i])).exists()) {
-				boolean res=recursiveRemoveFileDirectory(filelist[i]);
-				if (res=false) return false;
+		for (String s : filelist) {
+			if ((s != null) && (new File(s)).exists()) {
+				if (!recursiveRemoveFileDirectory(s))  return false;
 			}
 		}
 		return true;
@@ -230,9 +224,11 @@ public final class MOAInstallerActivity extends AppCompatActivity {
 			return true;
 		}
 		if (file.isDirectory()) {
-			for (File node: file.listFiles()) {
-				boolean res=recursiveRemoveFileDirectory(node.getAbsolutePath());
-				if (res=false) return false;
+		    File[] files = file.listFiles();
+		    if (files != null) {
+				for (File node : files) {
+					if (!recursiveRemoveFileDirectory(node.getAbsolutePath())) return false;
+				}
 			}
 		}
 		return file.delete();

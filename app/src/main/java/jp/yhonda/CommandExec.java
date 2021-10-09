@@ -20,6 +20,7 @@ package jp.yhonda;
 import android.util.Log;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.io.IOException;
@@ -32,8 +33,7 @@ public class CommandExec {
 	InputStream is;
 	OutputStream os;
 
-	public void execCommand(List<String> commandList) throws IOException,
-			Exception {
+	public void execCommand(List<String> commandList) throws IOException {
 		builder = new ProcessBuilder(commandList);
 		// process starts
 		process = builder.start();
@@ -51,7 +51,7 @@ public class CommandExec {
 		}
 	}
 
-	public void maximaCmd(String mcmd) throws IOException, Exception {
+	public void maximaCmd(String mcmd) throws IOException {
 		if (!mcmd.equals("")) {
 			// obtain process standard output stream
 			os = process.getOutputStream();

@@ -17,99 +17,97 @@
  */
 package jp.yhonda;
 
-import android.util.Log;
-
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.util.List;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class CommandExec {
-	StringBuilder sb = new StringBuilder(); // output buffer
-	ProcessBuilder builder = null;
-	Process process;
-	InputStream is;
-	OutputStream os;
+    StringBuilder sb = new StringBuilder(); // output buffer
+    ProcessBuilder builder = null;
+    Process process;
+    InputStream is;
+    OutputStream os;
 
-	public void execCommand(List<String> commandList) throws IOException {
-		builder = new ProcessBuilder(commandList);
-		// process starts
-		process = builder.start();
-		is = process.getInputStream();
-		while (true) {
-			int c = is.read();
-			if (c == -1) {
-				is.close();
-				break;
-			}
-			if (c == 0x04) {
-				break;
-			}
-			this.sb.append((char) c);
-		}
-	}
+    public void execCommand(List<String> commandList) throws IOException {
+        builder = new ProcessBuilder(commandList);
+        // process starts
+        process = builder.start();
+        is = process.getInputStream();
+        while (true) {
+            int c = is.read();
+            if (c == -1) {
+                is.close();
+                break;
+            }
+            if (c == 0x04) {
+                break;
+            }
+            this.sb.append((char) c);
+        }
+    }
 
-	public void maximaCmd(String mcmd) throws IOException {
-		if (!mcmd.equals("")) {
-			// obtain process standard output stream
-			os = process.getOutputStream();
-			os.write(mcmd.getBytes("UTF-8"));
-			os.flush();
-		}
-		while (true) {
-			int c = is.read();
-			if (c == 0x04) {
-				/* 0x04 is the prompt indicator */
-				/*
-				 * if (is.available()==0) { break; }
-				 */
-				break;
-			} else if (c == -1) {
-				is.close();
-				break;
-			} else if (c == 0x5c) { // 0x5c needs to be escaped by 0x5c, the
-									// backslash.
-				this.sb.append((char) c);
-				this.sb.append((char) c);
-			} else if (c == 0x27) { // 0x27 needs to be escaped as it is q
-									// single quote.
-				this.sb.append((char) 0x5c);
-				this.sb.append((char) c);
-			} else {
-				this.sb.append((char) c);
-			}
-		}
-	}
+    public void maximaCmd(String mcmd) throws IOException {
+        if (!mcmd.equals("")) {
+            // obtain process standard output stream
+            os = process.getOutputStream();
+            os.write(mcmd.getBytes(StandardCharsets.UTF_8));
+            os.flush();
+        }
+        while (true) {
+            int c = is.read();
+            if (c == 0x04) {
+                /* 0x04 is the prompt indicator */
+                /*
+                 * if (is.available()==0) { break; }
+                 */
+                break;
+            } else if (c == -1) {
+                is.close();
+                break;
+            } else if (c == 0x5c) { // 0x5c needs to be escaped by 0x5c, the
+                // backslash.
+                this.sb.append((char) c);
+                this.sb.append((char) c);
+            } else if (c == 0x27) { // 0x27 needs to be escaped as it is q
+                // single quote.
+                this.sb.append((char) 0x5c);
+                this.sb.append((char) c);
+            } else {
+                this.sb.append((char) c);
+            }
+        }
+    }
 
-	public String getProcessResult() {
-		return (new String(this.sb));
-	}
+    public String getProcessResult() {
+        return (new String(this.sb));
+    }
 
-	public void clearStringBuilder() {
-		this.sb.delete(0, this.sb.length());
-	}
+    public void clearStringBuilder() {
+        this.sb.delete(0, this.sb.length());
+    }
 
-	public String getPID() {
-		long pid = -1;
-		try {
-			Field f = process.getClass().getDeclaredField("pid");
-			f.setAccessible(true);
-			pid = f.getLong(process);
-			f.setAccessible(false);
-		} catch (Exception e) {
-			pid = -1;
-		}
-		if (pid != -1) return (String.valueOf(pid));
-		try {
-			Field f = process.getClass().getDeclaredField("id");
-			f.setAccessible(true);
-			pid = f.getLong(process);
-			f.setAccessible(false);
-		} catch (Exception e) {
-			pid = -1;
-		}
-		return (String.valueOf(pid));
-	}
+    public String getPID() {
+        long pid = -1;
+        try {
+            Field f = process.getClass().getDeclaredField("pid");
+            f.setAccessible(true);
+            pid = f.getLong(process);
+            f.setAccessible(false);
+        } catch (Exception e) {
+            pid = -1;
+        }
+        if (pid != -1) return (String.valueOf(pid));
+        try {
+            Field f = process.getClass().getDeclaredField("id");
+            f.setAccessible(true);
+            pid = f.getLong(process);
+            f.setAccessible(false);
+        } catch (Exception e) {
+            pid = -1;
+        }
+        return (String.valueOf(pid));
+    }
 }

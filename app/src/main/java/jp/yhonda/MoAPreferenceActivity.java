@@ -1,13 +1,16 @@
 package jp.yhonda;
 
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.*;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.*;
 import android.preference.PreferenceManager;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.List;
 
 /*
     Copyright 2012, 2013, 2014, 2015, 2016, 2017 Yasuaki Honda (yasuaki.honda@gmail.com)
@@ -37,12 +40,12 @@ public final class MoAPreferenceActivity extends PreferenceActivity implements O
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences sharedPrefs=PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPrefs.registerOnSharedPreferenceChangeListener(this);
 
         List<String> list = Arrays.asList("auto_completion_check_box_pref", "manURL", "fontSize1", "fontSize2");
-        for(String key : list){
-            AppGlobals.getSingleton().set(key,"false");
+        for (String key : list) {
+            AppGlobals.getSingleton().set(key, "false");
         }
     }
 
@@ -54,22 +57,22 @@ public final class MoAPreferenceActivity extends PreferenceActivity implements O
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         updatePreferenceSummary(key);
-        AppGlobals.getSingleton().set(key,"true");
+        AppGlobals.getSingleton().set(key, "true");
     }
 
     private void updatePreferenceSummary(String key) {
-        SharedPreferences sharedPrefs=PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         Preference pref = findPreference(key);
 
         if (pref.getClass().equals(CheckBoxPreference.class)) {
-            CheckBoxPreference checkbox_preference = (CheckBoxPreference)pref;
+            CheckBoxPreference checkbox_preference = (CheckBoxPreference) pref;
             if (checkbox_preference.isChecked()) {
                 checkbox_preference.setSummary("Yes");
             } else {
                 checkbox_preference.setSummary("No");
             }
         } else if (pref.getClass().equals(ListPreference.class)) {
-            ListPreference list_preference = (ListPreference)pref;
+            ListPreference list_preference = (ListPreference) pref;
             list_preference.setSummary(list_preference.getEntry());
         }
 

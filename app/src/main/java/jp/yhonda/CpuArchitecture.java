@@ -18,49 +18,43 @@
 
 package jp.yhonda;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.os.Build;
 
-import jp.yhonda.CommandExec;
-
 public final class CpuArchitecture {
-	static final String X86="x86";
-	static final String ARM="arm";
-	static final String NOT_SUPPORTED="not supported"; 
-	static final String NOT_INITIALIZED="not initialized"; 
+    static final String X86 = "x86";
+    static final String ARM = "arm";
+    static final String NOT_SUPPORTED = "not supported";
+    static final String NOT_INITIALIZED = "not initialized";
 
-	private static String cpuarch=NOT_INITIALIZED;
-	
-	private CpuArchitecture () {
-	}
-	
-	public static String getCpuArchitecture() {
-		return cpuarch;
-	}
-	
-	public static void initCpuArchitecture() {
-		String res=Build.CPU_ABI.toLowerCase();
-		if (res.contains(X86)) {
-			cpuarch=X86;
-		} else if (res.contains(ARM)) {
-			cpuarch=ARM;
-		} else if (res.equals(NOT_SUPPORTED)) {
-			cpuarch=NOT_SUPPORTED;
-		}
-	}
-	
-	public static String getMaximaFile() {
-		if (cpuarch.startsWith("not")) {
-			return cpuarch;
-		}
-		if (cpuarch.equals(X86)) {
-			return("maxima.x86.pie");
-		} else if (cpuarch.equals(ARM)) {
-			return("maxima.pie");
-		}
-		return NOT_SUPPORTED;
-	}
+    private static String cpuarch = NOT_INITIALIZED;
+
+    private CpuArchitecture() {
+    }
+
+    public static String getCpuArchitecture() {
+        return cpuarch;
+    }
+
+    public static void initCpuArchitecture() {
+        String res = Build.CPU_ABI.toLowerCase();
+        if (res.contains(X86)) {
+            cpuarch = X86;
+        } else if (res.contains(ARM)) {
+            cpuarch = ARM;
+        } else if (res.equals(NOT_SUPPORTED)) {
+            cpuarch = NOT_SUPPORTED;
+        }
+    }
+
+    public static String getMaximaFile() {
+        if (cpuarch.startsWith("not")) {
+            return cpuarch;
+        }
+        if (cpuarch.equals(X86)) {
+            return ("maxima.x86.pie");
+        } else if (cpuarch.equals(ARM)) {
+            return ("maxima.pie");
+        }
+        return NOT_SUPPORTED;
+    }
 }

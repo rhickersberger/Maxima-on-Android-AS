@@ -18,6 +18,11 @@
 
 package jp.yhonda;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
+import android.util.Log;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,122 +31,117 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.os.AsyncTask;
-import android.util.Log;
-
 public final class UnzipAsyncTask extends AsyncTask<Integer, Integer, Integer> {
-	InputStream inst;
-	String directory;
-	private final Activity activity;
-	private ProgressDialog dialog;
-	private String msg1, msg2;
+    InputStream inst;
+    String directory;
+    private final Activity activity;
+    private ProgressDialog dialog;
+    private String msg1, msg2;
 
-	public UnzipAsyncTask(Activity anActivity) {
-		super();
-		this.activity = anActivity;
-	}
+    public UnzipAsyncTask(Activity anActivity) {
+        super();
+        this.activity = anActivity;
+    }
 
-	public void setParams(InputStream in, String dir, String msg1, String msg2) {
-		inst = in;
-		directory = dir;
-		this.msg1 = msg1;
-		this.msg2 = msg2;
-	}
+    public void setParams(InputStream in, String dir, String msg1, String msg2) {
+        inst = in;
+        directory = dir;
+        this.msg1 = msg1;
+        this.msg2 = msg2;
+    }
 
-	@Override
-	protected void onPreExecute() {
-		// progres dialog
-		dialog = new ProgressDialog(activity);
-		dialog.setTitle(R.string.install_in_progress);
-		dialog.setMessage(msg1);
-		dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-		dialog.setCancelable(false);
-		dialog.setMax(100);
-		dialog.setProgress(0);
+    @Override
+    protected void onPreExecute() {
+        // progress dialog
+        dialog = new ProgressDialog(activity);
+        dialog.setTitle(R.string.install_in_progress);
+        dialog.setMessage(msg1);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(false);
+        dialog.setMax(100);
+        dialog.setProgress(0);
 
-		dialog.show();
-	}
+        dialog.show();
+    }
 
-	@Override
-	protected void onProgressUpdate(Integer... arg) {
-		dialog.setProgress(arg[0]);
-	}
+    @Override
+    protected void onProgressUpdate(Integer... arg) {
+        dialog.setProgress(arg[0]);
+    }
 
-	@Override
-	protected void onPostExecute(Integer stage) {
-		// close the progress dialog
-		if (stage == -1) {
-			((MOAInstallerActivity)activity).install(10); // indication of error
-			return;
-		}
-		dialog.setMessage(msg2);
-		dialog.show();
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException ignored) {
-		}
-		dialog.dismiss();
-		((MOAInstallerActivity)activity).install(stage + 1);
-	}
+    @Override
+    protected void onPostExecute(Integer stage) {
+        // close the progress dialog
+        if (stage == -1) {
+            ((MOAInstallerActivity) activity).install(10); // indication of error
+            return;
+        }
+        dialog.setMessage(msg2);
+        dialog.show();
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException ignored) {
+        }
+        dialog.dismiss();
+        ((MOAInstallerActivity) activity).install(stage + 1);
+    }
 
-	@Override
-	protected Integer doInBackground(Integer... arg) {
-		Integer stage = arg[0];
-		if (inst == null || directory == null) {
-			return (-1);
-		}
-		ZipInputStream zin = new ZipInputStream(inst);
-		ZipEntry ze;
-		int c = 0;
-		BufferedOutputStream fos = null;
-		File file = null;
-		byte[] buf = new byte[1024 * 1024];
-		try {
-			while ((ze = zin.getNextEntry()) != null) {
-				String name = ze.getName();
-				file = new File(directory, name);
-				if (ze.isDirectory()) {
-					// case of directory
-					if (!file.mkdirs()) {
-						return (-1);
-					}
-				} else {
-					// case of file
-					if (file.exists()) {
-						if (!file.delete()) {
-							Log.e("MoA", "failed to delete file 1");
-						}
-					}
-					fos = new BufferedOutputStream(new FileOutputStream(file),
-							64 * 1024);
-					int numread;
-					while ((numread = zin.read(buf)) != -1) {
-						fos.write(buf, 0, numread);
-						publishProgress(c++);
-					}
-					fos.close();
-				}
-			}
-		} catch (IOException e) {
-			Log.d("MoA", "exception12");
-			e.printStackTrace();
-			try {
-				if (fos != null)  fos.close();
-			} catch (IOException e1) {
-				Log.d("MoA", "exception13");
-				e1.printStackTrace();
-				return (-1);
-			}
-			if (file != null) {
-				if (!file.delete()) {
-					Log.e("MoA", "failed to delete file 2");
-				}
-			}
-			return (-1);
-		}
-		return stage;
-	}
+    @Override
+    protected Integer doInBackground(Integer... arg) {
+        Integer stage = arg[0];
+        if (inst == null || directory == null) {
+            return (-1);
+        }
+        ZipInputStream zin = new ZipInputStream(inst);
+        ZipEntry ze;
+        int c = 0;
+        BufferedOutputStream fos = null;
+        File file = null;
+        byte[] buf = new byte[1024 * 1024];
+        try {
+            while ((ze = zin.getNextEntry()) != null) {
+                String name = ze.getName();
+                file = new File(directory, name);
+                if (ze.isDirectory()) {
+                    // case of directory
+                    if (!file.mkdirs()) {
+                        return (-1);
+                    }
+                } else {
+                    // case of file
+                    if (file.exists()) {
+                        if (!file.delete()) {
+                            Log.e("MoA", "failed to delete file 1");
+                        }
+                    }
+                    fos = new BufferedOutputStream(new FileOutputStream(file),
+                            64 * 1024);
+                    int numread;
+                    while ((numread = zin.read(buf)) != -1) {
+                        fos.write(buf, 0, numread);
+                        publishProgress(c++);
+                    }
+                    fos.close();
+                }
+            }
+        } catch (IOException e) {
+            Log.d("MoA", "exception12");
+            e.printStackTrace();
+            try {
+                if (fos != null) fos.close();
+            } catch (IOException e1) {
+                Log.d("MoA", "exception13");
+                e1.printStackTrace();
+                return (-1);
+            }
+            if (file != null) {
+                if (!file.delete()) {
+                    Log.e("MoA", "failed to delete file 2");
+                }
+            }
+            return (-1);
+        }
+        return stage;
+    }
 
 }
